@@ -154,31 +154,35 @@ export default function DashboardPage() {
     );
   }
 
+  // 🟢 Safe indexing protection using Optional Chaining (?.)
   const metrics = analytics
     ? [
         {
           icon: <Receipt className="size-4 text-muted-foreground mb-2" />,
           label: "Total spent",
-          value: `MYR ${Number(analytics.summary.total_spent).toFixed(2)}`,
-          sub: `${analytics.summary.total_receipts} receipt${analytics.summary.total_receipts !== 1 ? "s" : ""}`,
+          value: `MYR ${Number(analytics.summary?.total_spent ?? 0).toFixed(2)}`,
+          sub: `${analytics.summary?.total_receipts ?? 0} receipt${analytics.summary?.total_receipts !== 1 ? "s" : ""}`,
         },
         {
           icon: <TrendingUp className="size-4 text-muted-foreground mb-2" />,
           label: "Tax paid",
-          value: `MYR ${Number(analytics.summary.total_tax).toFixed(2)}`,
-          sub: `${((analytics.summary.total_tax / analytics.summary.total_spent) * 100).toFixed(1)}% of total`,
+          value: `MYR ${Number(analytics.summary?.total_tax ?? 0).toFixed(2)}`,
+          sub: `${((analytics.summary?.total_tax / (analytics.summary?.total_spent || 1)) * 100).toFixed(1)}% of total`,
         },
         {
           icon: <Calculator className="size-4 text-muted-foreground mb-2" />,
           label: "Avg per receipt",
-          value: `MYR ${(analytics.summary.total_spent / analytics.summary.total_receipts).toFixed(2)}`,
+          value: `MYR ${(analytics.summary?.total_spent / (analytics.summary?.total_receipts || 1)).toFixed(2)}`,
           sub: "this period",
         },
         {
           icon: <Trophy className="size-4 text-muted-foreground mb-2" />,
           label: "Top category",
-          value: analytics.categoryBreakdown[0]?.category.toLowerCase() ?? "—",
-          sub: `MYR ${Number(analytics.categoryBreakdown[0]?.amount ?? 0).toFixed(2)}`,
+          // 🟢 Protected with optional chaining (.?) before calling toLowerCase()
+          value: analytics.categoryBreakdown?.[0]?.category
+            ? analytics.categoryBreakdown[0].category.toLowerCase()
+            : "—",
+          sub: `MYR ${Number(analytics.categoryBreakdown?.[0]?.amount ?? 0).toFixed(2)}`,
           capitalize: true,
         },
       ]
@@ -187,8 +191,21 @@ export default function DashboardPage() {
   return (
     <div className="w-full max-w-5xl mx-auto p-6">
       {isEmpty ? (
-        <div className="flex items-center justify-center p-4 min-h-[400px]">
-          <Empty>{/* existing empty state */}</Empty>
+        <div className="flex flex-col items-center justify-center p-4 min-h-[400px] border border-dashed rounded-lg bg-muted/20">
+          {/* 🟢 Populating your Empty component placeholder layout cleanly */}
+          <Receipt className="size-12 text-muted-foreground/60 mb-4 stroke-[1.5]" />
+          <h3 className="text-lg font-semibold tracking-tight mb-1">
+            No receipts recorded
+          </h3>
+          <p className="text-sm text-muted-foreground mb-5 text-center max-w-sm">
+            You haven't uploaded any receipts yet. Add your first spending entry
+            to view analytics tracker insights.
+          </p>
+          <Button asChild size="sm" className="gap-1.5">
+            <Link to="/add-receipt">
+              <Plus className="size-3.5" /> Add record
+            </Link>
+          </Button>
         </div>
       ) : (
         <div className="space-y-4">
