@@ -39,8 +39,8 @@ export function AddOrEditReceiptPage() {
   const [taxAmount, setTaxAmount] = useState("");
   const [receiptDate, setReceiptDate] = useState(new Date());
   const [shopName, setShopName] = useState("");
-  const [currList, setCurrList] = useState([]);
-  const [categoryList, setCategoryLists] = useState([]);
+  const [currList, setCurrList] = useState<any[]>([]);
+  const [categoryList, setCategoryLists] = useState<any[]>([]);
   const [currency, setCurrency] = useState("");
   const [category, setCategory] = useState("");
   const [invoice, setInvoice] = useState("");
@@ -53,10 +53,10 @@ export function AddOrEditReceiptPage() {
       setLoading(true);
       try {
         const currencies = await UniversalDataService.getAllCurrencies();
-        setCurrList(currencies);
+        setCurrList(currencies as any);
         const categories =
           await UniversalDataService.getAllSpendingCategories();
-        setCategoryLists(categories);
+        setCategoryLists(categories as any);
 
         if (receiptId) {
           setIsEdit(true);
@@ -208,7 +208,7 @@ export function AddOrEditReceiptPage() {
       const fieldErrors = validation.error.flatten().fieldErrors;
       const formattedErrors: Record<string, string> = {};
       Object.keys(fieldErrors).forEach((key) => {
-        formattedErrors[key] = fieldErrors[key]?.[0] || "";
+        formattedErrors[key] = (fieldErrors as any)[key]?.[0] || "";
       });
       setErrors(formattedErrors);
       setLoading(false);
@@ -228,7 +228,7 @@ export function AddOrEditReceiptPage() {
       navigate("/dashboard");
     } catch (err) {
       console.error("Submission error:", err);
-      showAlert("Failed to save changes");
+      showAlert("Failed to save changes", `${err}`);
     } finally {
       setLoading(false);
     }
@@ -325,7 +325,7 @@ export function AddOrEditReceiptPage() {
                   <Field orientation={"vertical"} className="gap-1">
                     <FieldLabel>Total Amount</FieldLabel>
                     <CurrencyInput
-                      value={amount}
+                      value={Number(amount)}
                       onChange={(e: any) => setAmount(e)}
                       placeholder="0.00"
                     />
@@ -339,7 +339,7 @@ export function AddOrEditReceiptPage() {
                   <Field orientation={"vertical"} className="gap-1">
                     <FieldLabel>Tax Amount</FieldLabel>
                     <CurrencyInput
-                      value={taxAmount}
+                      value={Number(taxAmount)}
                       onChange={(e: any) => setTaxAmount(e)}
                       placeholder="0.00"
                     />
